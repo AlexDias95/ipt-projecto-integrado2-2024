@@ -29,18 +29,10 @@ resource "aws_db_instance" "ipt_poc_cast_db" {
 resource "local_file" "db_connection_info" {
     content  = <<-EOT
     #IPT PoC Movies DB:
-    Host: ${aws_db_instance.ipt_poc_movies_db.address}
-    Port: ${aws_db_instance.ipt_poc_movies_db.port}
-    Username: ${aws_db_instance.ipt_poc_movies_db.username}
-    Password: ${aws_db_instance.ipt_poc_movies_db.password}
-    MOVIE_DB: postgresql://${aws_db_instance.ipt_poc_movies_db.username}:${aws_db_instance.ipt_poc_movies_db.password}@${aws_db_instance.ipt_poc_movies_db.address}:${aws_db_instance.ipt_poc_movies_db.port}/${aws_db_instance.ipt_poc_movies_db.db_name}
+    MOVIE_DB="postgresql://${aws_db_instance.ipt_poc_movies_db.username}:${aws_db_instance.ipt_poc_movies_db.password}@${aws_db_instance.ipt_poc_movies_db.address}:${aws_db_instance.ipt_poc_movies_db.port}/${aws_db_instance.ipt_poc_movies_db.db_name}"
 
     #IPT PoC Cast DB:
-    Host: ${aws_db_instance.ipt_poc_cast_db.address}
-    Port: ${aws_db_instance.ipt_poc_cast_db.port}
-    Username: ${aws_db_instance.ipt_poc_cast_db.username}
-    Password: ${aws_db_instance.ipt_poc_cast_db.password}
-    CAST_DB: postgresql://${aws_db_instance.ipt_poc_cast_db.username}:${aws_db_instance.ipt_poc_cast_db.password}@${aws_db_instance.ipt_poc_cast_db.address}:${aws_db_instance.ipt_poc_cast_db.port}/${aws_db_instance.ipt_poc_cast_db.db_name}
+    CAST_DB="postgresql://${aws_db_instance.ipt_poc_cast_db.username}:${aws_db_instance.ipt_poc_cast_db.password}@${aws_db_instance.ipt_poc_cast_db.address}:${aws_db_instance.ipt_poc_cast_db.port}/${aws_db_instance.ipt_poc_cast_db.db_name}"
     EOT
     filename = "../docker/.env"
     file_permission = 644

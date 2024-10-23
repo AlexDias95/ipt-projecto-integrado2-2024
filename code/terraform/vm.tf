@@ -11,7 +11,7 @@ resource "aws_key_pair" "generated_key" {
 resource "aws_instance" "rhel9" {
     ami           = "ami-007c3072df8eb6584" # Replace with the actual RHEL 9 AMI ID
     instance_type = "t2.micro"
-
+    
     tags = {
         Name = "ipt_poc_rhel9"
     }
@@ -42,4 +42,16 @@ resource "local_file" "rhel9_inventory" {
     EOT
     filename = "../ansible/inventory"
     file_permission = 644
+}
+
+resource "null_resource" "run_ansible_playbook" {
+    depends_on = [ local_file.db_connection_info, local_file.ssh_private_key, local_file.ssh_public_key, local_file.rhel9_inventory, aws_security_group.ipt_poc_vm_sg, aws_vpc_security_group_ingress_rule.allow_ssh_ipv4, aws_vpc_security_group_ingress_rule.allow_http_ipv4, aws_vpc_security_group_egress_rule.allow_all_traffic_ipv4 ]
+    triggers = {
+        always_run = timestamp()
+    }
+
+  provisioner "local-exec" {
+    command     = "ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i inventory ipt-poc.yml"
+    working_dir = "../ansible"
+  }
 }

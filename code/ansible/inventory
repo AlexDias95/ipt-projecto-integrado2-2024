@@ -1,2 +1,0 @@
-[ipt_poc_rhel9]
-18.199.82.54 ansible_user=ec2-user ansible_ssh_private_key_file=./ipt-poc-key

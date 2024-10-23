@@ -44,7 +44,7 @@ resource "aws_route_table_association" "a" {
 
 resource "aws_security_group" "ipt_poc_vm_sg" {
   name        = "ipt_poc_sg"
-  description = "Allow TLS and SSH inbound traffic and all outbound traffic"
+  description = "Allow HTTP and SSH inbound traffic and all outbound traffic"
   vpc_id      = aws_vpc.main.id
 
   tags = {
@@ -52,12 +52,12 @@ resource "aws_security_group" "ipt_poc_vm_sg" {
   }
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow_tls_ipv4" {
+resource "aws_vpc_security_group_ingress_rule" "allow_http_ipv4" {
   security_group_id = aws_security_group.ipt_poc_vm_sg.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "tcp"
-  to_port           = 443
-  from_port         = 443
+  to_port           = 8080
+  from_port         = 8080
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh_ipv4" {

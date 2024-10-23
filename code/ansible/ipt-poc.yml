@@ -8,6 +8,16 @@
       dnf:
         name: '*'
         state: latest
+    
+    - name: Subscription Manager
+      command: |
+        subscription-manager config --rhsm.manage_repos=1
+        subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms
+
+    - name: Install EPEL
+      dnf:
+        name: epel-release
+        state: present
 
     - name: Install podman
       dnf:
@@ -30,10 +40,15 @@
         state: started
         enabled: yes
 
+    - name: Copy the .env file
+      copy:
+        src: ../docker/.env
+        dest: /ipt-projecto-integrado2-2024/code/docker/.env
+
     - name: Load environment variables
       shell: source /ipt-projecto-integrado2-2024/code/docker/.env
 
-    - name: Build the docker-compose
-      command: docker-compose up -d
+    - name: Build the podman-compose
+      command: podman compose up -d
       args:
-        chdir: ipt-projecto-integrado2-2024/code/docker
+        chdir: /ipt-projecto-integrado2-2024/code/docker
