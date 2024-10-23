@@ -1,0 +1,39 @@
+---
+- name: Install microservices
+  hosts: ipt_poc_rhel9
+  become: yes
+
+  tasks:
+    - name: Update packages
+      dnf:
+        name: '*'
+        state: latest
+
+    - name: Install podman
+      dnf:
+        name: podman
+        state: present
+
+    - name: Install git
+      dnf:
+        name: git
+        state: present
+
+    - name: Clone the repository
+      git:
+        repo: https://github.com/AlexDias95/ipt-projecto-integrado2-2024.git
+        dest: /ipt-projecto-integrado2-2024
+
+    - name: Start podman service
+      service:
+        name: podman
+        state: started
+        enabled: yes
+
+    - name: Load environment variables
+      shell: source /ipt-projecto-integrado2-2024/code/docker/.env
+
+    - name: Build the docker-compose
+      command: docker-compose up -d
+      args:
+        chdir: ipt-projecto-integrado2-2024/code/docker

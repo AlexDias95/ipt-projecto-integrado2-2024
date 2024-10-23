@@ -1,0 +1,5 @@
+.env
+*tfstate*
+.DS_Store
+*ipt-poc-key*
+.terraform*
