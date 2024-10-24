@@ -4,6 +4,7 @@ resource "aws_vpc" "main" {
     tags = {
         Name = "main-vpc"
     }
+    enable_dns_hostnames = true
 }
 
 resource "aws_subnet" "ipt_poc_subnet01" {
@@ -14,6 +15,21 @@ resource "aws_subnet" "ipt_poc_subnet01" {
     tags = {
         Name = "ipt_poc_subnet01"
     }
+}
+
+resource "aws_subnet" "ipt_poc_subnet02" {
+    vpc_id            = aws_vpc.main.id
+    cidr_block        = "10.0.2.0/24"
+    availability_zone = "eu-central-1b"
+
+    tags = {
+        Name = "ipt_poc_subnet02"
+    }
+}
+
+resource "aws_db_subnet_group" "ipt_poc_db_subnet_group" {
+    name       = "ipt_poc_db_subnet_group"
+    subnet_ids = [aws_subnet.ipt_poc_subnet01.id, aws_subnet.ipt_poc_subnet02.id]
 }
 
 resource "aws_internet_gateway" "gw" {
@@ -72,4 +88,22 @@ resource "aws_vpc_security_group_egress_rule" "allow_all_traffic_ipv4" {
   security_group_id = aws_security_group.ipt_poc_vm_sg.id
   cidr_ipv4         = "0.0.0.0/0"
   ip_protocol       = "-1" # semantically equivalent to all ports
+}
+
+resource "aws_security_group" "ipt_poc_db_sg" {
+  name        = "ipt_poc_db_sg"
+  description = "Allow PostgreSQL inbound traffic and all outbound traffic"
+  vpc_id      = aws_vpc.main.id
+
+  tags = {
+    Name = "ipt_poc_db_sg"
+  }
+}
+
+resource "aws_vpc_security_group_ingress_rule" "allow_postgres_ipv4" {
+  security_group_id = aws_security_group.ipt_poc_db_sg.id
+  cidr_ipv4         = "0.0.0.0/0"
+  ip_protocol       = "tcp"
+  from_port         = 5432
+  to_port           = 5432
 }

@@ -1,0 +1,2 @@
+[ipt_poc_debian12]
+18.193.71.173 ansible_user=admin ansible_ssh_private_key_file=./ipt-poc-key

@@ -5,6 +5,8 @@ resource "aws_db_instance" "ipt_poc_movies_db" {
     engine_version       = "14.13"
     instance_class       = "db.t4g.micro"
     db_name              = "ipt_poc_movies_db"
+    db_subnet_group_name = aws_db_subnet_group.ipt_poc_db_subnet_group.id
+    vpc_security_group_ids = [aws_security_group.ipt_poc_db_sg.id]
     username             = "postgres"
     password             = "postgres123"
     parameter_group_name = "default.postgres14"
@@ -19,6 +21,8 @@ resource "aws_db_instance" "ipt_poc_cast_db" {
     engine_version       = "14.13"
     instance_class       = "db.t4g.micro"
     db_name              = "ipt_poc_cast_db"
+    db_subnet_group_name = aws_db_subnet_group.ipt_poc_db_subnet_group.id
+    vpc_security_group_ids = [aws_security_group.ipt_poc_db_sg.id]
     username             = "postgres"
     password             = "postgres123"
     parameter_group_name = "default.postgres14"

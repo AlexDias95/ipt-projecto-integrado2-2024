@@ -1,31 +1,58 @@
 ---
 - name: Install microservices
-  hosts: ipt_poc_rhel9
+  hosts: ipt_poc_debian12
   become: yes
 
   tasks:
     - name: Update packages
-      dnf:
+      apt:
         name: '*'
         state: latest
     
-    - name: Subscription Manager
-      command: |
-        subscription-manager config --rhsm.manage_repos=1
-        subscription-manager repos --enable codeready-builder-for-rhel-9-$(arch)-rpms
-
-    - name: Install EPEL
-      dnf:
-        name: epel-release
+    - name: Install gnupg
+      apt:
+        name: gnupg
         state: present
 
-    - name: Install podman
-      dnf:
-        name: podman
+    - name: Check if docker key exists
+      stat:
+        path: /etc/apt/keyrings/docker.gpg
+      register: docker_gpg
+
+    - name: Create APT keyring directory
+      file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    # TODO: cleanup docker.asc
+    - name: Download docker armored signature
+      get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /tmp/docker.asc
+      when: not docker_gpg.stat.exists
+
+    # TODO: Make sure gnupg/gnupg2 is installed
+    - name: Dearmor docker asc
+      command: /usr/bin/gpg --dearmor -o /etc/apt/keyrings/docker.gpg /tmp/docker.asc
+      when: not docker_gpg.stat.exists
+
+    - name: Add docker apt repository
+      apt_repository:
+        repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+        state: present
+        update_cache: yes
+        filename: docker
+
+    - name: Install docker
+      apt:
+        name: docker.io, docker-compose
         state: present
 
     - name: Install git
-      dnf:
+      apt:
         name: git
         state: present
 
@@ -33,10 +60,11 @@
       git:
         repo: https://github.com/AlexDias95/ipt-projecto-integrado2-2024.git
         dest: /ipt-projecto-integrado2-2024
+      ignore_errors: yes
 
-    - name: Start podman service
+    - name: Start docker service
       service:
-        name: podman
+        name: docker
         state: started
         enabled: yes
 
@@ -45,10 +73,8 @@
         src: ../docker/.env
         dest: /ipt-projecto-integrado2-2024/code/docker/.env
 
-    - name: Load environment variables
-      shell: source /ipt-projecto-integrado2-2024/code/docker/.env
-
-    - name: Build the podman-compose
-      command: podman compose up -d
+    - name: Build the docker-compose
+      shell: . /ipt-projecto-integrado2-2024/code/docker/.env && docker-compose up -d
       args:
         chdir: /ipt-projecto-integrado2-2024/code/docker
+        executable: /bin/bash
